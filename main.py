@@ -99,10 +99,16 @@ if all_products:
     # Создаем DataFrame
     df = pd.DataFrame(all_products)
     
+    # СОРТИРОВКА ПО ЦЕНЕ В ПОРЯДКЕ ВОЗРАСТАНИЯ
+    # Преобразуем цену в числовой формат для корректной сортировки
+    df['Цена_число'] = pd.to_numeric(df['Цена'].str.replace(' ', '').replace('', '0'), errors='coerce')
+    df = df.sort_values('Цена_число')  # Сортировка по возрастанию цены
+    df = df.drop('Цена_число', axis=1)  # Удаляем временный столбец
+
     # Сохраняем в Excel
     file_path = os.path.join(downloads_path, 'обувь_товары.xlsx')
     df.to_excel(file_path, index=False)
-    
+
     print(f"\n Файл успешно сохранен: {file_path}")
     print(f" Всего обработано товаров: {len(all_products)}")
 else:
