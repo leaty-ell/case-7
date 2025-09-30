@@ -1,6 +1,11 @@
 import requests
 from bs4 import BeautifulSoup
 from urllib.parse import urljoin
+import pandas as pd
+import os
+
+# Создаем список для хранения всех товаров
+all_products = []
 
 for pages in range(1, 10):
     url = f'https://obuv-tut2000.ru/magazin/folder/zhenskaya-obuv-optom-{pages}'
@@ -21,7 +26,7 @@ for pages in range(1, 10):
             product_soup = BeautifulSoup(product_response.text, 'lxml')
             
             # УНИФИЦИРОВАННЫЙ ПОИСК ВСЕХ ХАРАКТЕРИСТИК
-             # Ищем вид обуви в блоках param-item
+            # Ищем вид обуви в блоках param-item
             type_boots = "Не указан"
             param_items = product_soup.find_all('div', class_='param-item')
             for param in param_items:
@@ -71,5 +76,34 @@ for pages in range(1, 10):
         
         price_elem = i.find('div', class_='product-price')
         price = price_elem.get_text(' ', strip=True).replace('руб.', '') if price_elem else "Не указана"
-            
-        print(name + '\n' + price + '\n' + size + '\n' + material + '\n' + article + '\n' + type_boots + '\n' + season + '\n' + color + '\n' + country + '\n\n')
+        
+        # Добавляем товар в список
+        all_products.append({
+            'Наименование': name,
+            'Цена': price,
+            'Размеры': size,
+            'Материал верха': material,
+            'Артикул': article,
+            'Вид обуви': type_boots,
+            'Сезон': season,
+            'Цвет': color,
+            'Страна': country
+        })
+        
+        print(f"Обработан товар: {name}")
+# Сохраняем в Excel файл в папку Загрузки
+if all_products:
+    # Получаем путь к папке Загрузки
+    downloads_path = os.path.join(os.path.expanduser('~'), 'Downloads')
+    
+    # Создаем DataFrame
+    df = pd.DataFrame(all_products)
+    
+    # Сохраняем в Excel
+    file_path = os.path.join(downloads_path, 'обувь_товары.xlsx')
+    df.to_excel(file_path, index=False)
+    
+    print(f"\n Файл успешно сохранен: {file_path}")
+    print(f" Всего обработано товаров: {len(all_products)}")
+else:
+    print(" Товары не найдены")
