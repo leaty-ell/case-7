@@ -1,4 +1,4 @@
-DEVELOPERS: Ponasenko E., Loseva E., Limanova E.
+#DEVELOPERS: Ponasenko E., Loseva E., Limanova E.
 
 import requests
 from bs4 import BeautifulSoup
