@@ -1,4 +1,5 @@
-# main.py
+DEVELOPERS: Ponasenko E., Loseva E., Limanova E.
+
 import requests
 from bs4 import BeautifulSoup
 from urllib.parse import urljoin, quote
@@ -7,7 +8,7 @@ import os
 import time
 import ru_local as ru
 
-# Создаем список для хранения всех товаров
+
 all_products = []
 
 
@@ -35,7 +36,7 @@ def extract_product_details(product_url: str) -> dict:
     product_response = requests.get(product_url)
     product_soup = BeautifulSoup(product_response.text, 'lxml')
 
-    # Вид обуви
+
     type_boots = ru.NOT_SPECIFIED
     param_items = product_soup.find_all('div', class_='param-item')
     for param in param_items:
@@ -46,27 +47,27 @@ def extract_product_details(product_url: str) -> dict:
                 type_boots = body_elem.get_text(strip=True)
             break
 
-    # Артикул
+
     article_elem = product_soup.find('div', class_='shop2-product-article')
     article = article_elem.get_text(' ', strip=True) if article_elem else ru.NOT_SPECIFIED
 
-    # Цвет
+
     color_elem = product_soup.find('div', class_='option-item cvet odd')
     color = color_elem.get_text(' ', strip=True) if color_elem else ru.NOT_SPECIFIED
 
-    # Страна
+
     country_elem = product_soup.find('div', class_='gr-vendor-block')
     country = country_elem.get_text(' ', strip=True) if country_elem else ru.NOT_SPECIFIED
 
-    # Сезон
+
     season_elem = product_soup.find('div', class_='option-item sezon even')
     season = season_elem.get_text(' ', strip=True) if season_elem else ru.NOT_SPECIFIED
 
-    # Материал верха
+  
     material_elem = product_soup.find('div', class_='option-item material_verha_960 odd')
     material = material_elem.get_text(' ', strip=True) if material_elem else ru.NOT_SPECIFIED
 
-    # Размеры
+
     size_elem = product_soup.find('div', class_='option-item razmery_v_korobke even')
     size = size_elem.get_text(' ', strip=True) if size_elem else ru.NOT_SPECIFIED
     
@@ -134,7 +135,6 @@ def save_to_excel(products: list, filename: str = 'обувь_товары.xlsx'
     
     df = pd.DataFrame(products)
 
-    # Сортировка по цене
     df['Цена_число'] = pd.to_numeric(df[ru.PRICE].str.replace(' ', '').replace('', '0'), errors='coerce')
     df = df.sort_values('Цена_число')
     df = df.drop('Цена_число', axis=1)
@@ -150,7 +150,6 @@ def main():
     Main function of shoe products parser.
     Performs search, data collection and saving to Excel file.
     """
-    # Получаем поисковый запрос от пользователя
     search_text = get_search_query()
     encoded_text = quote(search_text)
 
@@ -168,17 +167,13 @@ def main():
         print(ru.PAGE_INFO.format(page, len(data)))
 
         for product_element in data:
-            # Получаем ссылку на страницу товара
             product_url = get_product_url(product_element)
             
             if product_url:
-                # Получаем детальную информацию о товаре
                 product_details = extract_product_details(product_url)
                 
-                # Получаем основную информацию о товаре
                 basic_info = extract_basic_product_info(product_element)
                 
-                # Добавляем товар в список
                 all_products.append({
                     ru.NAME: basic_info['name'],
                     ru.PRICE: basic_info['price'],
@@ -193,7 +188,7 @@ def main():
 
                 print(ru.PROCESSED_PRODUCT.format(basic_info['name']))
             else:
-                # Значения по умолчанию если нет ссылки на товар
+
                 basic_info = extract_basic_product_info(product_element)
                 all_products.append({
                     ru.NAME: basic_info['name'],
@@ -210,7 +205,6 @@ def main():
         page += 1
         time.sleep(1)  # пауза, чтобы не нагружать сайт
 
-    # Сохраняем в Excel файл в папку Загрузки
     if all_products:
         file_path = save_to_excel(all_products)
         
